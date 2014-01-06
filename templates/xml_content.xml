@@ -1,0 +1,49 @@
+<% foreach from=$xml_generic.data item=line_xml %>
+  <% strip %>
+  <<% $xml_generic.child_name %>
+    <% assign var=element_name value=$xml_generic.child_name %>
+    <% foreach from=$xml_generic.elements_attributes.$element_name key=element_attribute_name item=element_attribute_method %>
+      <% ' ' %><% $element_attribute_name %> = "<% $line_xml.$element_attribute_method %>"
+    <% /foreach %>
+  >
+  <% /strip %>
+    <% foreach from=$line_xml key=object_field_id item=object_field_value %>
+      <% if not $xml_generic.elements_configuration.$object_field_id.hide %>
+        <% strip %>
+          <
+            <% if $xml_generic.elements_configuration.$object_field_id.display %>
+              <% $xml_generic.elements_configuration.$object_field_id.display %>
+            <% else %>
+              <% $object_field_id %>
+            <% /if %>
+            <% foreach from=$xml_generic.elements_attributes.$object_field_id key=element_attribute_name item=element_attribute_method %>
+              <% ' ' %><% $element_attribute_name %> = "<% $line_xml.$element_attribute_method %>"
+            <% /foreach %>
+          >
+            <% if $object_field_value.type eq 'Tree' %>
+              
+              <% include file=xml_content.xml xml_generic=$object_field_value.value %>
+
+            <% else %>
+
+              <% if $xml_generic.elements_configuration.$object_field_id.CDATA %>
+                <![CDATA[
+              <% /if %>
+                <% $object_field_value.value %>
+              <% if $xml_generic.elements_configuration.$object_field_id.CDATA %>
+                ]]>
+              <% /if %>
+
+            <% /if %>
+          </
+            <% if $xml_generic.elements_configuration.$object_field_id.display %>
+               <% $xml_generic.elements_configuration.$object_field_id.display %>
+             <% else %>
+               <% $object_field_id %>
+             <% /if %>
+          >
+        <% /strip %>
+      <% /if %>
+     <% /foreach %>
+  </<% $xml_generic.child_name %>>
+<% /foreach %>

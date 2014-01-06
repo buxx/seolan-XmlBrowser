@@ -1,0 +1,4 @@
+<?xml version="<% $xml_generic.version %>" encoding="<% $xml_generic.encoding %>"?>
+<<% $xml_generic.parent_name %>>
+  <% include file=xml_content.xml %>
+</<% $xml_generic.parent_name %>>
