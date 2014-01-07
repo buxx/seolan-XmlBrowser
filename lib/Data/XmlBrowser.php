@@ -7,8 +7,11 @@
  * Convertir un source de données (browse) en xml
  * Doit s'associé avec un template correspondant (voir generic.xml ou xml.xml)
  * 
- * TODO: Depuis que les valeur sont exprimés array('type' => 'element', 'value' => 'la valeur'), si on veut afficher
+ * TODO: Depuis que les valeur sont exprimés array('type' => 'element', 
+ * 'value' => 'la valeur'), si on veut afficher
  * oid ca ne colle pas. A adapter donc.
+ * TODO: Les $elements_attributes doivent être gérés avec un callback et rangé 
+ * dans un array qui leurs est propre
  */
 class XmlBrowser
 {
@@ -93,6 +96,18 @@ class XmlBrowser
   // TODO: Cette méthode aurait bien besoin d'être nettoyé
   protected function getPreparedFieldsValues($prepared_data, $elements_configuration)
   {
+    // TODO ranger cette partie du code dans une methode
+    foreach ($prepared_data as $element_key => $element_data)
+    {
+      if (array_key_exists('oid', $element_data))
+      {
+        $prepared_data[$element_key]['oid'] = array(
+          'type' => 'element', 
+          'value' => $element_data[$element_key]['oid']
+        );
+      }
+    }
+      
     foreach ($elements_configuration as $element_field_id => $element_configuration)
     {
       if ($this->proceedThisField($element_field_id, $elements_configuration))
