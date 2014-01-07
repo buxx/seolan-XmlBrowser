@@ -1,13 +1,17 @@
 seolan-XmlBrowser
 =================
 
-# Introduction
+## Introduction
 
 Génération de sortie xml appuyé sur seolan. L'idée est de pouvoir configuré le rendu
 d'un fichier xml uniquement coté php exploitant le browse d'un module de gestionnaire
 de fiche.
 
-# Exemple
+## Evolution
+
+Peut évoluer pour sortir différents formats d'xml, comme du RSS.
+
+## Exemple
 
 ``` php
 $browser = new Browser();
