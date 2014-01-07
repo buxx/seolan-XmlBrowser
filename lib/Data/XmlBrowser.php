@@ -110,35 +110,32 @@ class XmlBrowser
       
     foreach ($elements_configuration as $element_field_id => $element_configuration)
     {
-      if ($this->proceedThisField($element_field_id, $elements_configuration))
-      {
-        $field_attribute = 'raw';
-        if (array_key_exists('field', $element_configuration))
-          $field_attribute = $element_configuration['field'];
+      $field_attribute = 'raw';
+      if (array_key_exists('field', $element_configuration))
+        $field_attribute = $element_configuration['field'];
 
-        foreach ($prepared_data as $element_key => $element)
+      foreach ($prepared_data as $element_key => $element)
+      {
+        if (!empty($element[$element_field_id]))
         {
-          if (!empty($element[$element_field_id]))
+          if (array_key_exists('field_value_call_back', $element_configuration))
           {
-            if (array_key_exists('field_value_call_back', $element_configuration))
-            {
-              $field_callback = $element_configuration['field_value_call_back'];
-              $field_value_data = array(
-                'type'  => 'element',
-                'value' => $field_callback($prepared_data[$element_key][$element_field_id])
-              );
-            }
-            else
-            {
-              $field_value_data = array(
-                'type'  => 'element',
-                'value' => $prepared_data[$element_key][$element_field_id]->$field_attribute
-              );
-            }
+            $field_callback = $element_configuration['field_value_call_back'];
+            $field_value_data = array(
+              'type'  => 'element',
+              'value' => $field_callback($prepared_data[$element_key][$element_field_id])
+            );
           }
-          
-          $prepared_data[$element_key][$element_field_id] = $field_value_data;
+          else
+          {
+            $field_value_data = array(
+              'type'  => 'element',
+              'value' => $prepared_data[$element_key][$element_field_id]->$field_attribute
+            );
+          }
         }
+
+        $prepared_data[$element_key][$element_field_id] = $field_value_data;
       }
     }
     
@@ -192,17 +189,6 @@ class XmlBrowser
         $configuration['additional_fields_configuration']
       )
     );
-  }
-  
-  protected function proceedThisField($element_field_id, $elements_configuration)
-  {
-    if (array_key_exists($element_field_id, $elements_configuration))
-    {
-      if (array_key_exists('hide', $elements_configuration[$element_field_id]))
-        return !$elements_configuration[$element_field_id]['hide'];
-    }
-    
-    return True;
   }
   
 }
