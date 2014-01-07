@@ -3,7 +3,7 @@
   <<% $xml_generic.child_name %>
     <% assign var=element_name value=$xml_generic.child_name %>
     <% foreach from=$xml_generic.elements_attributes.$element_name key=element_attribute_name item=element_attribute_method %>
-      <% ' ' %><% $element_attribute_name %> = "<% $line_xml.$element_attribute_method %>"
+      <% ' ' %><% $element_attribute_name %> = "<% $line_xml.$element_attribute_method.value %>"
     <% /foreach %>
   >
   <% /strip %>
