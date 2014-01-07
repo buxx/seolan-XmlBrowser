@@ -100,18 +100,6 @@ class XmlBrowser
   // TODO: Cette méthode aurait bien besoin d'être nettoyé (beaucoups meme)
   protected function getPreparedFieldsValues($prepared_data, $elements_configuration)
   {
-    // TODO ranger cette partie du code dans une methode
-    foreach ($prepared_data as $element_key => $element_data)
-    {
-      if (array_key_exists('oid', $element_data))
-      {
-        $prepared_data[$element_key]['oid'] = array(
-          'type' => 'element', 
-          'value' => $element_data['oid']
-        );
-      }
-    }
-      
     foreach ($elements_configuration as $element_field_id => $element_configuration)
     {
       $field_attribute = 'raw';
@@ -138,6 +126,13 @@ class XmlBrowser
               'value' => $field_callback($prepared_data[$element_key][$element_field_id])
             );
           }
+          elseif ($element_field_id === 'oid')
+          {
+            $field_value_data = array(
+              'type'  => 'element',
+              'value' => $prepared_data[$element_key][$element_field_id]
+            );
+          }
           else
           {
             $field_value_data = array(
@@ -150,6 +145,7 @@ class XmlBrowser
         $prepared_data[$element_key][$element_field_id] = $field_value_data;
       }
     }
+    
     return $prepared_data;
   }
   
