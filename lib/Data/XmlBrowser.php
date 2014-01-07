@@ -107,7 +107,7 @@ class XmlBrowser
       {
         $prepared_data[$element_key]['oid'] = array(
           'type' => 'element', 
-          'value' => $element_data[$element_key]['oid']
+          'value' => $element_data['oid']
         );
       }
     }
@@ -150,7 +150,6 @@ class XmlBrowser
         $prepared_data[$element_key][$element_field_id] = $field_value_data;
       }
     }
-    
     return $prepared_data;
   }
   
