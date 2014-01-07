@@ -12,6 +12,10 @@
  * oid ca ne colle pas. A adapter donc.
  * TODO: Les $elements_attributes doivent être gérés avec un callback et rangé 
  * dans un array qui leurs est propre
+ * TODO: Quand on travaille au calcul des valeurs de champs on met a jour de 
+ * tableau en cours. C'est pas tres logique car au fur et a mesure de l'avancement
+ * on ne travaille pas avec les même valeurs dans les callbacks ... Il faudrait 
+ * avoir un tableau de reference et construire le tableau qui sera rendu a Smarty
  */
 class XmlBrowser
 {
@@ -93,7 +97,7 @@ class XmlBrowser
     );
   }
   
-  // TODO: Cette méthode aurait bien besoin d'être nettoyé
+  // TODO: Cette méthode aurait bien besoin d'être nettoyé (beaucoups meme)
   protected function getPreparedFieldsValues($prepared_data, $elements_configuration)
   {
     // TODO ranger cette partie du code dans une methode
@@ -118,7 +122,15 @@ class XmlBrowser
       {
         if (!empty($element[$element_field_id]))
         {
-          if (array_key_exists('field_value_call_back', $element_configuration))
+          if (array_key_exists('field_value_call_back_with_object', $element_configuration))
+          {
+            $field_callback = $element_configuration['field_value_call_back_with_object'];
+            $field_value_data = array(
+              'type'  => 'element',
+              'value' => $field_callback($prepared_data[$element_key])
+            );
+          }
+          elseif (array_key_exists('field_value_call_back', $element_configuration))
           {
             $field_callback = $element_configuration['field_value_call_back'];
             $field_value_data = array(
