@@ -19,6 +19,11 @@
             <% foreach from=$xml_generic.elements_attributes.$object_field_id key=element_attribute_name item=element_attribute_method %>
               <% ' ' %><% $element_attribute_name %> = "<% $line_xml.$element_attribute_method %>"
             <% /foreach %>
+            <% if $object_field_value.attributes|count %>
+              <% foreach from=$object_field_value.attributes key=element_attribute_name item=element_attribute_value %>
+                <% ' ' %><% $element_attribute_name %>="<% $element_attribute_value %>"
+              <% /foreach %>
+            <% /if %>
           >
             <% if $object_field_value.type eq 'Tree' %>
               

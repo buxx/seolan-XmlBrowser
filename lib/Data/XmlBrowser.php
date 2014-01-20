@@ -52,11 +52,20 @@ class XmlBrowser
         'FPOSITIONS' => array('display' => 'positions', 'field_value_call_back' => function($field){
           return json_encode($field->alltable);
         }),
+        'FDESC' => array('display' => 'description', 'field' => 'raw', 
+          'attributes' => array(
+            'lang' => function($element){
+              return 'fr';
+            }
+          )
+        )
       )
    * CDATA: Le contenue est dans un CDATA
    * field: la valeur doit sera cet attribut de l'objet du champ
    * display: nom d'affichage du champ
    * field_value_call_back: callback pour calculer la valeur que prendra le champs
+   * field_value_call_back_with_object: Pareil que field_value_call_back mais on transmet l'objet courant au callback
+   * attributes: Tableau contenant les attribut de l'élément a calculer
    * @param array $additional_fields_configuration Champs additionnels. Réutilise le type de 
    * configuration de $elements_configuration. Il est cependant obligatoire de 
    * donner le callback. Dans ce callback sera donné le tableau de l'élement 
@@ -143,6 +152,7 @@ class XmlBrowser
         }
 
         $prepared_data[$element_key][$element_field_id] = $field_value_data;
+        $prepared_data[$element_key][$element_field_id]['attributes'] = $this->getFieldAttributes($element, $element_field_id, $elements_configuration);
       }
     }
     
@@ -168,6 +178,7 @@ class XmlBrowser
             'type'  => 'element',
             'value' => $new_field_configuration['field_value_call_back']($element_data)
           );
+          $prepared_data[$field_key][$new_field_id]['attributes'] = $this->getFieldAttributes($element_data, $new_field_id, $elements_configuration);
         }
       }
     }
@@ -196,6 +207,23 @@ class XmlBrowser
         $configuration['additional_fields_configuration']
       )
     );
+  }
+  
+  protected function getFieldAttributes($element, $element_field_id, $elements_configuration)
+  {
+    $attributes = array();
+    if (array_key_exists('attributes', $elements_configuration[$element_field_id]))
+    {
+      if (count($elements_configuration[$element_field_id]['attributes']))
+      {
+        foreach ($elements_configuration[$element_field_id]['attributes'] as $attribute_name => $closure)
+        {
+          $attributes[$attribute_name] = $closure($element);
+        }
+      }
+    }
+    
+    return $attributes;
   }
   
 }
