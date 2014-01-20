@@ -10,6 +10,7 @@ de fiche.
 ## Evolution
 
 Peut évoluer pour sortir différents formats d'xml, comme du RSS.
+Revoir le nom du projet qui laissent actuellement penser a un lecteur d'xml ...
 
 ## Exemple
 
