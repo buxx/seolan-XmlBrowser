@@ -71,6 +71,7 @@ class XmlBrowser
    * attributes: Tableau contenant les attribut de l'élément a calculer
    * encapsuled_by: Encapsule l'element dans un element parent portant le nom
    * donné dans ce paramètre
+   * multilanguage_allow: PErmet d'utiliser le multi language (boolean)
    * @param array $additional_fields_configuration Champs additionnels. Réutilise le type de 
    * configuration de $elements_configuration. Il est cependant obligatoire de 
    * donner le callback. Dans ce callback sera donné le tableau de l'élement 
@@ -114,6 +115,7 @@ class XmlBrowser
   // TODO: Cette méthode aurait bien besoin d'être nettoyé (beaucoups meme)
   protected function getPreparedFieldsValues($prepared_data, $elements_configuration)
   {
+    
     foreach ($elements_configuration as $element_field_id => $element_configuration)
     {
       $field_attribute = 'raw';
@@ -122,6 +124,11 @@ class XmlBrowser
 
       foreach ($prepared_data as $element_key => $element)
       {
+        $field_value_data = array(
+          'type'  => 'element',
+          'value' => ''
+        );
+        
         if (!empty($element[$element_field_id]))
         {
           if (array_key_exists('field_value_call_back_with_object', $element_configuration))
@@ -151,7 +158,7 @@ class XmlBrowser
           {
             $field_value_data = array(
               'type'  => 'element',
-              'value' => $this->getFieldValueWithAttribute($prepared_data[$element_key][$element_field_id], $field_attribute)
+              'value' => $this->getFieldValueWithAttribute($element[$element_field_id], $field_attribute)
             );
           }
         }
@@ -159,6 +166,7 @@ class XmlBrowser
         $prepared_data[$element_key][$element_field_id] = $field_value_data;
         $prepared_data[$element_key][$element_field_id]['attributes'] = $this->getFieldAttributes($element, $element_field_id, $elements_configuration);
         $prepared_data[$element_key][$element_field_id]['encapsuled_by'] = $this->getEncapsuledBy($element_field_id, $elements_configuration);
+        $prepared_data[$element_key][$element_field_id]['multilanguage_allow'] = $elements_configuration[$element_field_id]['multilanguage_allow'];
       }
     }
     

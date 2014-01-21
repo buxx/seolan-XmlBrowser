@@ -14,7 +14,7 @@
           <<% $object_field_value.encapsuled_by %>>
         <% /if %>
           
-        <% if count($object_field_value.value) eq 1 %>
+        <% if count($object_field_value.value) eq 1 or not $object_field_value.multilanguage_allow %>
         
           <% include file=xml_element.xml field_lang=$xml_generic.default_language %>
           
