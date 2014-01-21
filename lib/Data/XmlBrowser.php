@@ -23,17 +23,20 @@ class XmlBrowser
   protected $version;
   protected $encoding;
   protected $exhaustive;
-  
+  protected $default_field_lang;
+
+
   /**
    * 
    * @param string $version Version of XML document
    * @param string $encoding Encoding of XML document
    * dans le paramètre $elements_configuration de la méthode publique prepare()
    */
-  public function __construct($version = "1.0", $encoding = "UTF-8")
+  public function __construct($default_language, $version = "1.0", $encoding = "UTF-8")
   {
     $this->version = $version;
     $this->encoding = $encoding;
+    $this->default_language = $default_language;
   }
   
   /**
@@ -66,6 +69,8 @@ class XmlBrowser
    * field_value_call_back: callback pour calculer la valeur que prendra le champs
    * field_value_call_back_with_object: Pareil que field_value_call_back mais on transmet l'objet courant au callback
    * attributes: Tableau contenant les attribut de l'élément a calculer
+   * encapsuled_by: Encapsule l'element dans un element parent portant le nom
+   * donné dans ce paramètre
    * @param array $additional_fields_configuration Champs additionnels. Réutilise le type de 
    * configuration de $elements_configuration. Il est cependant obligatoire de 
    * donner le callback. Dans ce callback sera donné le tableau de l'élement 
@@ -76,7 +81,6 @@ class XmlBrowser
    */
   public function prepare($prepared_data, $root_structure, $elements_attributes = array(), $elements_configuration = array(), $additional_fields_configuration = array())
   {
-    //die(var_dump($this->get($prepared_data, $root_structure, $elements_attributes, $elements_configuration, $additional_fields_configuration)));
     XShell::toScreen2('xml', 'generic', $this->get($prepared_data, $root_structure, $elements_attributes, $elements_configuration, $additional_fields_configuration));
   }
   
@@ -102,7 +106,8 @@ class XmlBrowser
       'version' => $this->version,
       'encoding' => $this->encoding,
       'elements_attributes' => $elements_attributes,
-      'elements_configuration' => array_merge($elements_configuration, $additional_fields_configuration)
+      'elements_configuration' => array_merge($elements_configuration, $additional_fields_configuration),
+      'default_language' => $this->default_language
     );
   }
   
@@ -146,17 +151,35 @@ class XmlBrowser
           {
             $field_value_data = array(
               'type'  => 'element',
-              'value' => $prepared_data[$element_key][$element_field_id]->$field_attribute
+              'value' => $this->getFieldValueWithAttribute($prepared_data[$element_key][$element_field_id], $field_attribute)
             );
           }
         }
 
         $prepared_data[$element_key][$element_field_id] = $field_value_data;
         $prepared_data[$element_key][$element_field_id]['attributes'] = $this->getFieldAttributes($element, $element_field_id, $elements_configuration);
+        $prepared_data[$element_key][$element_field_id]['encapsuled_by'] = $this->getEncapsuledBy($element_field_id, $elements_configuration);
       }
     }
     
     return $prepared_data;
+  }
+  
+  protected function getFieldValueWithAttribute($field, $attribute)
+  {
+    $field_values = array();
+    foreach ($field as $field_lang => $field_object)
+    {
+      $field_values[$field_lang] = $field_object->$attribute;
+    }
+    
+    return $field_values;
+  }
+  
+  protected function getEncapsuledBy($element_field_id, $elements_configuration)
+  {
+    if (array_key_exists('encapsuled_by', $elements_configuration[$element_field_id]))
+      return $elements_configuration[$element_field_id]['encapsuled_by'];
   }
   
   protected function addAdditionnalFields($prepared_data, $elements_configuration)

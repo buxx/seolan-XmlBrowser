@@ -1,0 +1,42 @@
+<% strip %>
+  <
+    <% if $xml_generic.elements_configuration.$object_field_id.display %>
+      <% $xml_generic.elements_configuration.$object_field_id.display %>
+    <% else %>
+      <% $object_field_id %>
+    <% /if %>
+    <% if $display_lang_attribute %>
+      <% ' ' %>lang="<% $field_lang %>"
+    <% /if %>
+    <% foreach from=$xml_generic.elements_attributes.$object_field_id key=element_attribute_name item=element_attribute_method %>
+      <% ' ' %><% $element_attribute_name %> = "<% $line_xml.$element_attribute_method %>"
+    <% /foreach %>
+    <% if $object_field_value.attributes|count %>
+      <% foreach from=$object_field_value.attributes key=element_attribute_name item=element_attribute_value %>
+        <% ' ' %><% $element_attribute_name %>="<% $element_attribute_value %>"
+      <% /foreach %>
+    <% /if %>
+  >
+    <% if $object_field_value.type eq 'Tree' %>
+
+      <% include file=xml_content.xml xml_generic=$object_field_value.value %>
+
+    <% else %>
+
+      <% if $xml_generic.elements_configuration.$object_field_id.CDATA %>
+        <![CDATA[
+      <% /if %>
+        <% $object_field_value.value.$field_lang %>
+      <% if $xml_generic.elements_configuration.$object_field_id.CDATA %>
+        ]]>
+      <% /if %>
+
+    <% /if %>
+  </
+    <% if $xml_generic.elements_configuration.$object_field_id.display %>
+       <% $xml_generic.elements_configuration.$object_field_id.display %>
+     <% else %>
+       <% $object_field_id %>
+     <% /if %>
+  >
+<% /strip %>

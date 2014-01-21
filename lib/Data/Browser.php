@@ -15,21 +15,57 @@
 class Browser
 {
   
+  protected $default_language;
+  
+  public function __construct($default_language = Null)
+  {
+    $this->default_language = $default_language;
+    if (!$this->default_language)
+      $this->default_language = XShell::getLangData();
+  }
+  
+  public function getDefaultLanguage()
+  {
+    return $this->default_language;
+  }
+  
   /**
    * @param int $module_id
    * @param array $parameters
+   * @param mixed $lang_data, recoit un tableau contenant les langues voulues ou une chaine all
    * @return array
    * 
    * Retourne le browse
    */
-  protected function getBrowse($module_id, $parameters)
+  protected function getBrowse($module_id, $parameters, $lang_data='all')
   {
+    if(!isSet($parameters['pagesize'])){
+      $parameters['pagesize']=9999999999;
+    }
+    
     $module = XModule::objectFactory($module_id);
-    return $module->browse(array_merge($parameters, array(
-      'tplentry' => TZR_RETURN_DATA,
-      'pagesize' => 9999999999,
-      '_local' => True,
-    )));
+   
+    if(!is_array($lang_data)) $lang_array = $GLOBALS['TZR_LANGUAGES'];
+    else{
+      $lang_array = array();
+      foreach($GLOBALS['TZR_LANGUAGES'] as $klang=>$lang){
+        if(in_array($lang,$lang_data)) $lang_array[$klang]=$lang; 
+      }
+    }
+      foreach($lang_array as $klang=>$lang){
+        
+        $_REQUEST['LANG_DATA']=$klang;
+        $_REQUEST['LANG_USER']=$klang;
+        $lang=XShell::getLangData($klang,true);
+        $lang=XShell::getLangData(NULL, true);
+        
+        $res[$lang]=$module->browse(array_merge($parameters, array(
+          'tplentry' => TZR_RETURN_DATA,
+          '_local' => True,
+        )));
+      }
+      
+      return $res;
   }
   
   /**
@@ -38,45 +74,74 @@ class Browser
    * @param boolean $get_oid Ajoute ou non le oid dans le tableau de retour
    * @param string $field_attribute Si précisé: Place comme valeur du champs 
    * l'attribut de l'objet au lieu de l'objet représentant le champ
+   * @param mixed $lang_data, recoit un tableau contenant les langues voulues ou une chaine all
    * @return array
    */
-  protected function getFormatedData($browse, $get_oid = True, $field_attribute = Null)
+  protected function getFormatedData($browse, $get_oid = True, $field_attribute = Null, $lang_data='all')
   {
-    $data = array();
-    
-    if ($get_oid)
-      $data = $this->updateBrowsedDataWithOid ($data, $browse);
-    
-    foreach ($browse['header_fields'] as $header_field)
-    {
-      foreach ($browse['lines_o'.$header_field->field] as $key => $field)
-      {
-        $data = $this->updateBrowsedDataWithField($data, $header_field->field, $key, $field, $field_attribute);
+
+    if(!is_array($lang_data)) 
+      $lang_data = $GLOBALS['TZR_LANGUAGES'];
+    else{
+      $lang_data = array();
+      foreach($GLOBALS['TZR_LANGUAGES'] as $klang=>$lang){
+        if(in_array($lang,$lang_data)) 
+          $lang_data[$klang]=$lang;
       }
     }
     
+    $data = array();
+    if ($get_oid)
+      $data = $this->updateBrowsedDataWithOid ($data, $browse, $lang_data);
+    
+    foreach ($lang_data as $klang=>$lang){
+
+      foreach ($browse[$klang]['header_fields'] as $header_field)
+        {
+          
+          foreach ($browse[$klang]['lines_o'.$header_field->field] as $key => $field)
+          {
+            
+            if($header_field->translatable != 0)
+            {
+              $data_lang = $klang;
+            }
+            else 
+            {
+              $data_lang = 0;
+            }
+            
+            $data = $this->updateBrowsedDataWithField($data, $header_field->field, $key, $field, $field_attribute, $data_lang);
+            
+          }
+        }
+    }
+      
     return $data;
   }
-  
+
   protected function updateBrowsedDataWithOid($data, $browse)
   {
     foreach ($browse['lines_oid'] as $key => $field)
     {
-      $data = $this->updateBrowsedDataWithField($data, 'oid', $key, $field);
+      $data = $this->updateBrowsedDataWithField($data, 'oid', $key, $field, Null);
     }
-    
+
     return $data;
   }
   
-  protected function updateBrowsedDataWithField($data, $field_id, $key, $field, $field_attribute)
-  {    
+  protected function updateBrowsedDataWithField($data, $field_id, $key, $field, $field_attribute, $lang = Null)
+  {
+    if (!$lang)
+      $lang = $this->default_language;
+    
     if (!array_key_exists($key, $data))
       $data[$key] = array();
 
     if (!$field_attribute)
-      $data[$key] = array_merge($data[$key], array($field_id => $field));
+      $data[$key][$field_id][$lang] = $field;
     else
-      $data[$key] = array_merge($data[$key], array($field_id => $field->$field_attribute));
+      $data[$key][$field_id][$lang] = $field->$field_attribute;
     
     return $data;
   }
@@ -126,9 +191,9 @@ class Browser
    * 
    * Retourne le browse dans un tableau de données 
    */
-  public function getArrangedData($module_id, $parameters, $get_oid = True)
+  public function getArrangedData($module_id, $parameters, $get_oid = True, $lang_data='all')
   {
-    return $this->getFormatedData($this->getBrowse($module_id, $parameters), $get_oid);
+    return $this->getFormatedData($this->getBrowse($module_id, $parameters, $lang_data), $get_oid,NULL,$lang_data);
   }
   
   /**

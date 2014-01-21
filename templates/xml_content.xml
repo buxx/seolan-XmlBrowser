@@ -9,45 +9,27 @@
   <% /strip %>
     <% foreach from=$line_xml key=object_field_id item=object_field_value %>
       <% if not $xml_generic.elements_configuration.$object_field_id.hide %>
-        <% strip %>
-          <
-            <% if $xml_generic.elements_configuration.$object_field_id.display %>
-              <% $xml_generic.elements_configuration.$object_field_id.display %>
-            <% else %>
-              <% $object_field_id %>
-            <% /if %>
-            <% foreach from=$xml_generic.elements_attributes.$object_field_id key=element_attribute_name item=element_attribute_method %>
-              <% ' ' %><% $element_attribute_name %> = "<% $line_xml.$element_attribute_method %>"
-            <% /foreach %>
-            <% if $object_field_value.attributes|count %>
-              <% foreach from=$object_field_value.attributes key=element_attribute_name item=element_attribute_value %>
-                <% ' ' %><% $element_attribute_name %>="<% $element_attribute_value %>"
-              <% /foreach %>
-            <% /if %>
-          >
-            <% if $object_field_value.type eq 'Tree' %>
-              
-              <% include file=xml_content.xml xml_generic=$object_field_value.value %>
-
-            <% else %>
-
-              <% if $xml_generic.elements_configuration.$object_field_id.CDATA %>
-                <![CDATA[
-              <% /if %>
-                <% $object_field_value.value %>
-              <% if $xml_generic.elements_configuration.$object_field_id.CDATA %>
-                ]]>
-              <% /if %>
-
-            <% /if %>
-          </
-            <% if $xml_generic.elements_configuration.$object_field_id.display %>
-               <% $xml_generic.elements_configuration.$object_field_id.display %>
-             <% else %>
-               <% $object_field_id %>
-             <% /if %>
-          >
-        <% /strip %>
+        
+        <% if $object_field_value.encapsuled_by %>
+          <<% $object_field_value.encapsuled_by %>>
+        <% /if %>
+          
+        <% if count($object_field_value.value) eq 1 %>
+        
+          <% include file=xml_element.xml field_lang=$xml_generic.default_language %>
+          
+        <% else %>
+          
+          <% foreach from=$object_field_value.value key=field_lang item=field_value %>
+            <% include file=xml_element.xml display_lang_attribute=True %>
+          <% /foreach %>
+          
+        <% /if %>
+          
+        <% if $object_field_value.encapsuled_by %>
+          </<% $object_field_value.encapsuled_by %>>
+        <% /if %>
+        
       <% /if %>
      <% /foreach %>
   </<% $xml_generic.child_name %>>
